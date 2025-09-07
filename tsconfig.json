@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    // "rootDir": "src",
+    "outDir": "dist",
+    "module": "ESNext",
+    "target": "ES2020",
+    "jsx": "preserve",
+    "allowJs": false,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "downlevelIteration": true,
+    "importHelpers": true,
+    "moduleResolution": "bundler",
+    "lib": ["dom", "esnext"],
+    "experimentalDecorators": false,
+    "noImplicitAny": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": false,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "removeComments": true,
+    "declaration": true,
+    "pretty": true
+  },
+  "include": ["src/**/*", "./typings.d.ts"],
+  "exclude": ["node_modules/**/*", "-bak/**/*"]
+}

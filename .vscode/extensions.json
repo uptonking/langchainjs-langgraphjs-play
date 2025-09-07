@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "mervin.markdown-formatter",
+    "aaron-bond.better-comments",
+    "streetsidesoftware.code-spell-checker",
+    "alefragnani.bookmarks",
+    "dozerg.tsimportsorter"
+  ]
+}
