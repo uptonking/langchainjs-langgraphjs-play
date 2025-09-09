@@ -48,6 +48,8 @@
     "@langchain/core": "^0.3.75",
     "@langchain/groq": "^0.2.3",
     "@langchain/langgraph": "^0.4.9",
+    "@langchain/ollama": "^0.2.4",
+    "@langchain/openai": "^0.6.11",
     "@langchain/tavily": "^0.1.5",
     "langchain": "^0.3.33",
     "react": "^18.3.1",

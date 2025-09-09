@@ -34,8 +34,8 @@ const structuredLlm = model.withStructuredOutput({
     required: ['briefDescription', 'details'],
   },
 });
-// @ts-expect-error llm-topic
 const res = await structuredLlm.invoke('introduce sort algorithms', {
+  // @ts-expect-error llm-topic
   name: 'computerTopic',
 });
 
