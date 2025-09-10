@@ -4,7 +4,7 @@ import { HumanMessage } from '@langchain/core/messages';
 
 import { initChatModel } from 'langchain/chat_models/universal';
 
-// ❌ not working
+// ❌ not working with local model
 const model = await initChatModel('qwen/qwen3-4b-2507', {
   modelProvider: 'openai',
   baseUrl: 'http://localhost:1234/v1',

@@ -1,8 +1,9 @@
-import '@dotenvx/dotenvx/config';
+// import '@dotenvx/dotenvx/config';
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { tool } from '@langchain/core/tools';
 import { ChatGroq } from '@langchain/groq';
+import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod';
 
 /**
@@ -39,11 +40,20 @@ const calculatorTool = tool(
   },
 );
 
-const llm = new ChatGroq({
-  model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-  temperature: 0,
+// const llm = new ChatGroq({
+//   model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+//   temperature: 0,
+// });
+const llm = new ChatOpenAI({
+  model: 'qwen/qwen3-4b-2507',
+  configuration: {
+    baseURL: 'http://localhost:1234/v1',
+    apiKey: 'not-needed',
+  },
+  temperature: 0.5,
 });
 
+// conversion from LangChain tool to our model provider’s specific format
 const llmWithTools = llm.bindTools([calculatorTool]);
 
 // const res = await llmWithTools.invoke("What is 11 * 22");
