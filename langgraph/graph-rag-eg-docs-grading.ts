@@ -1,3 +1,6 @@
+// import '@dotenvx/dotenvx/config';
+// import "cheerio";
+
 import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/cheerio';
 import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
@@ -10,6 +13,8 @@ import { createRetrieverTool } from 'langchain/tools/retriever';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { z } from 'zod';
 
+// 🧑‍🏫 [LangGraph Retrieval Agent](https://langchain-ai.github.io/langgraphjs/tutorials/rag/langgraph_agentic_rag/)
+
 const urls = [
   'https://lilianweng.github.io/posts/2023-06-23-agent/',
   'https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/',
@@ -20,21 +25,33 @@ const docs = await Promise.all(
   urls.map((url) => new CheerioWebBaseLoader(url).load()),
 );
 const docsList = docs.flat();
+console.log(';; docsList ', docsList[0].pageContent.length);
+console.log(';; docsList ', docsList[0]);
 
 const textSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 500,
   chunkOverlap: 50,
 });
 const docSplits = await textSplitter.splitDocuments(docsList);
+console.log(';; docSplits ', docSplits.length);
 
+const embeddings = new OpenAIEmbeddings({
+  // model: "text-embedding-3-large",
+  model: 'text-embedding-embeddinggemma-300m',
+  configuration: {
+    baseURL: 'http://localhost:1234/v1',
+    apiKey: 'not-needed',
+  },
+});
 // save embeddings to vectorDB
 const vectorStore = await MemoryVectorStore.fromDocuments(
   docSplits,
-  new OpenAIEmbeddings(),
+  embeddings,
 );
 
 const retriever = vectorStore.asRetriever();
 
+// pass a custom state object to the graph, or use a simple list of messages.
 const GraphState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
@@ -42,17 +59,26 @@ const GraphState = Annotation.Root({
   }),
 });
 
-const tool = createRetrieverTool(retriever, {
+const retriveTool = createRetrieverTool(retriever, {
   name: 'retrieve_blog_posts',
   description:
     'Search and return information about Lilian Weng blog posts on LLM agents, prompt engineering, and adversarial attacks on LLMs.',
 });
-const tools = [tool];
+const retriveTools = [retriveTool];
 
-const toolNode = new ToolNode<typeof GraphState.State>(tools);
+const retriveToolNode = new ToolNode<typeof GraphState.State>(retriveTools);
 
+// const model = new ChatOpenAI({
+//   model: 'gpt-4o',
+//   temperature: 0,
+// });
 const model = new ChatOpenAI({
-  model: 'gpt-4o',
+  // model: 'qwen/qwen3-4b-2507',
+  model: 'google/gemma-3-12b',
+  configuration: {
+    baseURL: 'http://localhost:1234/v1',
+    apiKey: 'not-needed',
+  },
   temperature: 0,
 });
 
@@ -65,7 +91,6 @@ const model = new ChatOpenAI({
  */
 function shouldRetrieve(state: typeof GraphState.State): string {
   const { messages } = state;
-  console.log('---DECIDE TO RETRIEVE---');
   const lastMessage = messages[messages.length - 1];
 
   if (
@@ -73,10 +98,12 @@ function shouldRetrieve(state: typeof GraphState.State): string {
     Array.isArray(lastMessage.tool_calls) &&
     lastMessage.tool_calls.length
   ) {
-    console.log('---DECISION: RETRIEVE---');
+    console.log('---RETRIEVE DECISION: YES ✅ ---');
     return 'retrieve';
   }
+
   // If there are no tool calls then we finish.
+  console.log('---RETRIEVE DECISION: NO ---');
   return END;
 }
 
@@ -92,7 +119,7 @@ function shouldRetrieve(state: typeof GraphState.State): string {
 async function gradeDocuments(
   state: typeof GraphState.State,
 ): Promise<Partial<typeof GraphState.State>> {
-  console.log('---GET RELEVANCE---');
+  console.log('---NODE gradeDocuments---');
 
   const { messages } = state;
   const tool = {
@@ -155,10 +182,10 @@ function checkRelevance(state: typeof GraphState.State): string {
   }
 
   if (toolCalls[0].args.binaryScore === 'yes') {
-    console.log('---DECISION: DOCS RELEVANT---');
+    console.log('---RELEVANT DECISION: YES---');
     return 'yes';
   }
-  console.log('---DECISION: DOCS NOT RELEVANT---');
+  console.log('---RELEVANT DECISION: NO ---');
   return 'no';
 }
 
@@ -174,7 +201,7 @@ function checkRelevance(state: typeof GraphState.State): string {
 async function agent(
   state: typeof GraphState.State,
 ): Promise<Partial<typeof GraphState.State>> {
-  console.log('---CALL AGENT---');
+  console.log('---Node AGENT---');
 
   const { messages } = state;
   // Find the AIMessage which contains the `give_relevance_score` tool call,
@@ -196,7 +223,7 @@ async function agent(
   //   temperature: 0,
   //   streaming: true,
   // }).bindTools(tools);
-  const mainChatModel = model.bindTools(tools);
+  const mainChatModel = model.bindTools(retriveTools);
   const response = await mainChatModel.invoke(filteredMessages);
   return {
     messages: [response],
@@ -252,7 +279,7 @@ async function generate(
   const lastToolMessage = messages
     .slice()
     .reverse()
-    .find((msg) => msg._getType() === 'tool');
+    .find((msg) => msg.getType() === 'tool');
   if (!lastToolMessage) {
     throw new Error('No tool message found in the conversation history');
   }
@@ -282,7 +309,7 @@ async function generate(
 const workflow = new StateGraph(GraphState)
   // Define the nodes which we'll cycle between.
   .addNode('agent', agent)
-  .addNode('retrieve', toolNode)
+  .addNode('retrieve', retriveToolNode)
   .addNode('gradeDocuments', gradeDocuments)
   .addNode('rewrite', rewrite)
   .addNode('generate', generate);
@@ -307,7 +334,7 @@ workflow.addConditionalEdges(
   {
     // Call tool node
     yes: 'generate',
-    no: 'rewrite', // placeholder
+    no: 'rewrite',
   },
 );
 
