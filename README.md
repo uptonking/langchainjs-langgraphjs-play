@@ -30,9 +30,12 @@ npx tsx ./server/chain-groq1-starter.ts
 ```
 
 # roadmap
+
 - [ ] `graph.stream` not work with local llm
 # notes
 - examples in python: https://github.com/uptonking/langchain-langgraph-play
 
+- why does rag return only one relavent doc?
+  - changing embedding model may help
 # license
 MIT

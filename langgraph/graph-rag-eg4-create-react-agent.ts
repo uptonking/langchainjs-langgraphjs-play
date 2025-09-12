@@ -1,32 +1,9 @@
 import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/cheerio';
-import { Document } from '@langchain/core/documents';
-import {
-  AIMessage,
-  BaseMessage,
-  HumanMessage,
-  isAIMessage,
-  SystemMessage,
-  ToolMessage,
-} from '@langchain/core/messages';
-import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
+import { AIMessage, BaseMessage, isAIMessage } from '@langchain/core/messages';
 import { tool } from '@langchain/core/tools';
-import {
-  Annotation,
-  END,
-  MemorySaver,
-  MessagesAnnotation,
-  START,
-  StateGraph,
-} from '@langchain/langgraph';
-import {
-  createReactAgent,
-  ToolNode,
-  toolsCondition,
-} from '@langchain/langgraph/prebuilt';
-import { ChatOpenAI, OpenAIClient, OpenAIEmbeddings } from '@langchain/openai';
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { ChatOpenAI, OpenAIClient } from '@langchain/openai';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
-import { pull } from 'langchain/hub';
-import { createRetrieverTool } from 'langchain/tools/retriever';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { z } from 'zod';
 
@@ -160,7 +137,7 @@ const agent = createReactAgent({ llm: llm, tools: [retrieve] });
 // ----------
 
 const prettyPrint = (message: BaseMessage) => {
-  let txt = `[${message._getType()}]: ${message.content}`;
+  let txt = `[${message.getType()}]: ${message.content}`;
   if ((isAIMessage(message) && message.tool_calls?.length) || 0 > 0) {
     const tool_calls = (message as AIMessage)?.tool_calls
       ?.map((tc) => `- ${tc.name}(${JSON.stringify(tc.args)})`)
@@ -170,8 +147,7 @@ const prettyPrint = (message: BaseMessage) => {
   console.log(txt);
 };
 
-const inputMessage = `What is yjs?
-are there any popular products or companies or github repos using it ?`;
+const inputMessage = `What is yjs? are there any popular products or companies or github repos using it ?`;
 
 const inputs5 = { messages: [{ role: 'user', content: inputMessage }] };
 
@@ -179,6 +155,6 @@ for await (const step of await agent.stream(inputs5, {
   streamMode: 'values',
 })) {
   const lastMessage = step.messages[step.messages.length - 1];
+  console.log('\n------');
   prettyPrint(lastMessage);
-  console.log('-----\n');
 }
