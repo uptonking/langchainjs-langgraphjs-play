@@ -35,7 +35,7 @@ function shouldContinue({ messages }: typeof MessagesAnnotation.State) {
   return '__end__';
 }
 
-// Define the function that calls the model
+// 👾 ai as a Node in the graph
 async function callModel(state: typeof MessagesAnnotation.State) {
   const response = await model.invoke(state.messages);
 

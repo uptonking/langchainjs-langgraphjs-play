@@ -37,5 +37,8 @@
   "editor.codeActionsOnSave": ["source.organizeImports.sortImports"],
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   }
 }

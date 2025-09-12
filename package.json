@@ -30,12 +30,19 @@
     "format:check": "npm run formatter -- --check",
     "help": "echo 'exec npm start to view the demo'",
     "lint": "eslint src --ext .ts,.tsx --fix -o eslint-log.log",
+    "prepare": "husky",
     "serve": "tsx watch ./server/app.ts",
     "serve:prod": "npm run build && node ./target/server.mjs",
     "start": "npm run demo",
     "test": "cross-env REACT_APP_ENV=react jest --config ./jest.config.js",
-    "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "typecheck": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,mjs,mts,json,css}": [
+      "npm run lint",
+      "npm run format",
+      "git add"
+    ]
   },
   "browserslist": [
     "defaults",
@@ -96,6 +103,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-transform-stub": "^2.0.0",
     "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.6",
     "node-polyfill-webpack-plugin": "^4.1.0",
     "oxlint": "^1.14.0",
     "prettier": "^3.6.2",

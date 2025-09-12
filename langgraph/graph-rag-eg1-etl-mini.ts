@@ -1,11 +1,11 @@
 import '@dotenvx/dotenvx/config';
 
 import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/cheerio';
+import { Document } from '@langchain/core/documents';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { Annotation, StateGraph } from '@langchain/langgraph';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { Document } from '@langchain/core/documents';
 
 import {
   ChatGoogleGenerativeAI,
@@ -126,7 +126,7 @@ const graph = new StateGraph(StateAnnotation)
 
 // let inputs = { question: "What is CmRDTs ?" };
 console.log('\n👾');
-let inputs = { question: 'What is yjs  ?' };
+const inputs = { question: 'What is yjs  ?' };
 
 const result = await graph.invoke(inputs);
 
