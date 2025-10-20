@@ -26,7 +26,7 @@ npx tsx ./langchain/chain-groq1-chat-local-mini.ts
 
 # Option 2: use groq api, configure the `GROQ_API_KEY` first
 cp .env.example .env
-npx tsx ./server/chain-groq1-starter.ts
+npx tsx ./langchain/chain-groq1-chat-starter.ts
 ```
 
 # roadmap
